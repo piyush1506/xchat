@@ -1,0 +1,18 @@
+
+.scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar{
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+@media  screen and (max-width:420px){
+    .sidebar{
+        /* display: none; */
+        width: 100%;
+    }
+    .message-body{
+        display: none;
+    }
+}
