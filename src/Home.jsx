@@ -45,11 +45,17 @@ function Home() {
  const storedUser = localStorage.getItem('user');
 const user = storedUser ? JSON.parse(storedUser) : null;
   const appID = 496043362;
-      const  userID = user?._id ;
- 
-     const userName=user?.name||'guest';
+     let TOKEN = null;
+let userID = null;
+let userName = 'guest';
+
+if (!user?._id) return
+  userID = user._id;
+  userName = user.name || 'guest';
+  // TOKEN = ZegoUIKitPrebuilt.generateKitTokenForTest(appID, serverSecret, null, userID, userName);
+
        const serverSecret = "5e96d7e03b88a750639930817f46b35e";
-      const TOKEN = ZegoUIKitPrebuilt.generateKitTokenForTest(appID,
+       TOKEN = ZegoUIKitPrebuilt.generateKitTokenForTest(appID,
          serverSecret,
          null,
          userID,
@@ -57,6 +63,7 @@ const user = storedUser ? JSON.parse(storedUser) : null;
       )
  
       useEffect(()=>{
+        if (!TOKEN) return; 
          const zp = ZegoUIKitPrebuilt.create(TOKEN);
          zpRef.current = zp
          zp.addPlugins({ZIM})
