@@ -95,7 +95,7 @@ if (!user?._id) return
 useEffect(()=>{
   const token = localStorage.getItem('token')
   const storeduser = JSON.parse(localStorage.getItem('user'))
-  const user  = storeduser ?JSON.parse(storeduser) :null;
+  const user  = storeduser ?storeduser :null;
     if(!token)return navigate('/register')
   //  console.log('user token',user,token)
    setDetail(user)
