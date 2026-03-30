@@ -38,7 +38,7 @@ export default function Room (){
         console.log(receiver)
         if(!receiver) return
         const targetUser = {
-            userID:receiver._id,
+            userID:receiver?._id,
             userName:receiver.name
         };
         zpRef.current.sendCallInvitation({

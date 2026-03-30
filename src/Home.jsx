@@ -130,7 +130,7 @@ socket.on('stopTyping',()=>{
     const getallUser = async()=>{
       const res  =await  axios.get(`${ import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/alluser`)
       const data =res.data
-      console.log(data.users)
+
       setUsers(data.users)
     }
     getallUser()
@@ -147,11 +147,11 @@ socket.on('stopTyping',()=>{
    const setupConversation=async(user)=>{
    try {
       // setReceiverId(user._id)
-         const payload = {receiverId:user._id,senderId}
+         const payload = {receiverId:user?._id,senderId}
       console.log(payload)
       // if(!receiverId || !senderId) return
        
-      const res  =await  axios.post(`${ import.meta.env.VITE_API_URL||'http://localhost:8000'}/api/v1/conversation`,payload)
+      const res  =await  axios.post(`${ import.meta.env.VITE_API_URL}/api/v1/conversation`,payload)
        console.log(res.data)
       const data =  res.data.conversation
          setConversationId(data._id);
@@ -161,11 +161,9 @@ socket.on('stopTyping',()=>{
       console.log('data',data)
 
 
-      // const response  =await  axios.post('http://localhost:8000/api/v1/message',)
-      // const resdata =  res.data
         console.log('conversation id',conversationId)
            if(!conversationId) return
-     const Res  =await  axios.post(`${ import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/allmessages`,{conversationId})
+     const Res  =await  axios.post(`${ import.meta.env.VITE_API_URL}/api/v1/allmessages`,{conversationId})
       const Resdata = Res.data
       console.log(Resdata)
 
@@ -192,13 +190,13 @@ socket.on('stopTyping',()=>{
 const handleTyping = (e)=>{
   setMessage(e.target.value)
     socket.emit('typing',{
-      receiverId:receiver._id,
+      receiverId:receiver?._id,
       senderId,
       senderName:JSON.parse(localStorage.getItem('user')).name
     })
     clearTimeout(typingTimeout.current)
     typingTimeout.current = setTimeout(()=>{
-      socket.emit('stopTyping',{receiverId:receiver._id})
+      socket.emit('stopTyping',{receiverId:receiver?._id})
     },2000)
   
 }
@@ -209,17 +207,17 @@ const handleTyping = (e)=>{
     if(message.length==0)return
       const payload = {message,senderId,conversationId}
       console.log(payload)
-      const res  =await  axios.post(`${ import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/message`,payload)
-      const newMessage =res.data.conversation.messages
+      const res  =await  axios.post(`${ import.meta.env.VITE_API_URL}/api/v1/message`,payload)
+      const newMessage =res.data?.conversation?.messages
       console.log('send message',res)
       setMessages(prev=>[...prev,newMessage.at(-1)])
       socket.emit('sendMessage',{
         senderId,
-        receiverId:receiver._id,
+        receiverId:receiver?._id,
         message,
         conversationId
       })
-      socket.emit('stopTyping',{senderId,receiverId:receiver._id})
+      socket.emit('stopTyping',{senderId,receiverId:receiver?._id})
       // setUsers(data.users)
         setMessage('')
   }
@@ -241,7 +239,7 @@ const handleTyping = (e)=>{
                  {
                       users.map((user,index)=>(
                          <div onClick={()=>{setupConversation(user);}} key={index} value={user._id} className="bg-white bg-gradient-to-r from-violet-200 to-pink-200 shadow-md  m-2 p-1  text-gray-800 rounded-lg">
-                    <span className=''><h1 className='text-2xl font-semibold '>{user.name} {user._id == detail._id ?'(you)':'' }</h1></span>
+                    <span className=''><h1 className='text-2xl font-semibold '>{user?.name} {user._id == detail._id ?' (you)':'' }</h1></span>
                     {
                       onlineusers.includes(user._id)&& (
                         <span className='w-3 h-3 bg-green-500 rounded-full'></span>
@@ -265,7 +263,7 @@ const handleTyping = (e)=>{
       className="text-white md:hidden text-xl font-bold">
       ←
     </button>
-    <h2 className='text-xl text-white'>{receiver.name}</h2>
+    <h2 className='text-xl text-white'>{receiver?.name ||'user'}</h2>
   </div>
 
   {/* icons — always visible */}
@@ -281,8 +279,8 @@ const handleTyping = (e)=>{
            
                 
               {   messages.map((message,index)=>( 
-                 <div  className={`md:mx-4 px-2 flex items-start ${message.sender===detail._id ? 'justify-end ':'' }  my-2`}>
-                    <span className={`text-xl p-1 text-white ${message.sender===detail._id ? 'bg-purple-600 rounded-bl-xl':'rounded-br-xl bg-white text-black'} shadow-sm px-3 rounded-t-xl `}><h2 className=''>{message.text}</h2></span>
+                 <div  className={`md:mx-4 px-2 flex items-start ${message.sender===detail?._id ? 'justify-end ':'' }  my-2`}>
+                    <span className={`text-xl p-1 text-white ${message.sender===detail?._id ? 'bg-purple-600 rounded-bl-xl':'rounded-br-xl bg-white text-black'} shadow-sm px-3 rounded-t-xl `}><h2 className=''>{message?.text}</h2></span>
                 </div>
                ))} 
                <div ref={bottomRef} className=""></div>
