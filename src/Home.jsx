@@ -42,12 +42,12 @@ function Home() {
     const location = useLocation()
 
  const zpRef = useRef(null)
-  // const {receiver} = location.state;
- const user = JSON.parse(localStorage.getItem('user'))
+ const storedUser = localStorage.getItem('user');
+const user = storedUser ? JSON.parse(storedUser) : null;
   const appID = 496043362;
       const  userID = user?._id ;
  
-     const userName=user.name||'guest';
+     const userName=user?.name||'guest';
        const serverSecret = "5e96d7e03b88a750639930817f46b35e";
       const TOKEN = ZegoUIKitPrebuilt.generateKitTokenForTest(appID,
          serverSecret,
@@ -188,10 +188,13 @@ socket.on('stopTyping',()=>{
 
 const handleTyping = (e)=>{
   setMessage(e.target.value)
+  const storedUser = localStorage.getItem('user');
+const typingUserName = storedUser ? JSON.parse(storedUser)?.name || 'guest' : 'guest';
+
     socket.emit('typing',{
       receiverId:receiver?._id,
       senderId,
-      senderName:JSON.parse(localStorage.getItem('user')).name || 'guest'
+      senderName:typingUserName
     })
     clearTimeout(typingTimeout.current)
     typingTimeout.current = setTimeout(()=>{
