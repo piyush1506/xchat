@@ -15,10 +15,27 @@ import { ZIMKit, ZIMKitProvider } from '@zegocloud/zimkit-react';
 
 
 
-  const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:8000')
+  const socket = io(import.meta.env.VITE_API_URL)
 
 
 function Home() {
+
+
+  const navigate = useNavigate()
+  const [users,setUsers]= useState([])
+   const [isidebaropen,setIsidebaropen] = useState(false)
+  const [messages, setMessages] = useState([])
+  const [message, setMessage] = useState('')
+  const [onlineusers, setonlineusers] = useState([])
+  const [receiver, setReceiver] = useState([])
+  const [detail,setDetail] = useState({})
+  const [senderId,setSenderId] = useState(null)
+  const [istyping,setistyping] = useState(false)
+  const [receiverId,setReceiverId] = useState(null)
+  const bottomRef = useRef(null)
+  const [typingUser,setTypingUser] = useState('')
+  const typingTimeout  = useRef(null)
+  const [conversationId, setConversationId] = useState(null);
 
 
   
@@ -28,9 +45,9 @@ function Home() {
   // const {receiver} = location.state;
  const user = JSON.parse(localStorage.getItem('user'))
   const appID = 496043362;
-      const  userID = user._id;
+      const  userID = user?._id ;
  
-     const userName=user.name
+     const userName=user.name||'guest';
        const serverSecret = "5e96d7e03b88a750639930817f46b35e";
       const TOKEN = ZegoUIKitPrebuilt.generateKitTokenForTest(appID,
          serverSecret,
@@ -46,7 +63,6 @@ function Home() {
       },[TOKEN])
        
       function invite(calltype){
-         console.log(receiver)
          if(!receiver) return
          const targetUser = {
              userID:receiver._id,
@@ -69,31 +85,15 @@ function Home() {
 
 
 
-
-  const navigate = useNavigate()
-  const [users,setUsers]= useState([])
-   const [isidebaropen,setIsidebaropen] = useState(false)
-  const [messages, setMessages] = useState([])
-  const [message, setMessage] = useState('')
-  const [onlineusers, setonlineusers] = useState([])
-  const [receiver, setReceiver] = useState([])
-  const [detail,setDetail] = useState({})
-  const [senderId,setSenderId] = useState(null)
-  const [istyping,setistyping] = useState(false)
-  const [receiverId,setReceiverId] = useState(null)
-  const bottomRef = useRef(null)
-  const [typingUser,setTypingUser] = useState('')
-  const typingTimeout  = useRef(null)
-  const [conversationId, setConversationId] = useState(null);
-
 useEffect(()=>{
   const token = localStorage.getItem('token')
-  const user = JSON.parse(localStorage.getItem('user'))
+  const storeduser = JSON.parse(localStorage.getItem('user'))
+  const user  = storeduser ?JSON.parse(storeduser) :null;
     if(!token)return navigate('/register')
   //  console.log('user token',user,token)
    setDetail(user)
-   setSenderId(user._id)
-   socket.emit('addUser',user._id)
+   setSenderId(user?._id)
+   socket.emit('addUser',user?._id)
 
 socket.on('getOnlineusers',(users)=>{
   setonlineusers(users)
@@ -145,27 +145,26 @@ socket.on('stopTyping',()=>{
 
 
    const setupConversation=async(user)=>{
+    if(!user?._id) return
    try {
-      // setReceiverId(user._id)
+    
          const payload = {receiverId:user?._id,senderId}
       console.log(payload)
       // if(!receiverId || !senderId) return
        
       const res  =await  axios.post(`${ import.meta.env.VITE_API_URL}/api/v1/conversation`,payload)
        console.log(res.data)
-      const data =  res.data.conversation
-         setConversationId(data._id);
+      const data =  res.data?.conversation
+         setConversationId(data?._id);
          setReceiver(user)
-         socket.emit('joinroom',{senderId,receiverId:user._id})
+         socket.emit('joinroom',{senderId,receiverId:user?._id})
          
       console.log('data',data)
 
 
-        console.log('conversation id',conversationId)
            if(!conversationId) return
      const Res  =await  axios.post(`${ import.meta.env.VITE_API_URL}/api/v1/allmessages`,{conversationId})
       const Resdata = Res.data
-      console.log(Resdata)
 
    } catch (err) {
      console.error(err)
@@ -178,7 +177,7 @@ socket.on('stopTyping',()=>{
     try {
       const res = await axios.post(`${ import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/allmessages`, { conversationId });
       console.log("Fetched messages:", res.data.messages.messages);
-      setMessages(res.data.messages.messages)
+      setMessages(res.data?.messages?.messages || [])
     } catch (err) {
       console.error(err);
     }
@@ -192,7 +191,7 @@ const handleTyping = (e)=>{
     socket.emit('typing',{
       receiverId:receiver?._id,
       senderId,
-      senderName:JSON.parse(localStorage.getItem('user')).name
+      senderName:JSON.parse(localStorage.getItem('user')).name || 'guest'
     })
     clearTimeout(typingTimeout.current)
     typingTimeout.current = setTimeout(()=>{
@@ -262,7 +261,7 @@ const handleTyping = (e)=>{
       onClick={() => setConversationId(null)} 
       className="text-white md:hidden text-xl font-bold">
       ←
-    </button>
+    </button> 
     <h2 className='text-xl text-white'>{receiver?.name ||'user'}</h2>
   </div>
 
