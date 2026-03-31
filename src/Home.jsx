@@ -6,8 +6,6 @@ import { useNavigate } from 'react-router-dom'
 import {io} from 'socket.io-client'
 // import { ZIMKit, ZIMKitProvider } from '@zegocloud/zimkit-react';
 import { ZIM } from "zego-zim-web";
-import { useParams } from "react-router-dom";
-import { useLocation } from "react-router-dom";
 import {ZegoUIKitPrebuilt} from '@zegocloud/zego-uikit-prebuilt'
 // import socket from './socket'
 
@@ -23,7 +21,7 @@ function Home() {
 
   const navigate = useNavigate()
   const [users,setUsers]= useState([])
-   const [isidebaropen,setIsidebaropen] = useState(false)
+  //  const [isidebaropen,setIsidebaropen] = useState(false)
   const [messages, setMessages] = useState([])
   const [message, setMessage] = useState('')
   const [onlineusers, setonlineusers] = useState([])
@@ -36,57 +34,6 @@ function Home() {
   const [typingUser,setTypingUser] = useState('')
   const typingTimeout  = useRef(null)
   const [conversationId, setConversationId] = useState(null);
-
-
-  
-    const location = useLocation()
-
- const zpRef = useRef(null)
- const storedUser = localStorage.getItem('user');
-const user = storedUser ? JSON.parse(storedUser) : null;
-  const appID = 496043362;
-     let TOKEN = null;
-let userID = null;
-let userName = 'guest';
-
-if (!user?._id) return
-  userID = user._id;
-  userName = user.name || 'guest';
-  // TOKEN = ZegoUIKitPrebuilt.generateKitTokenForTest(appID, serverSecret, null, userID, userName);
-
-       const serverSecret = "5e96d7e03b88a750639930817f46b35e";
-       TOKEN = ZegoUIKitPrebuilt.generateKitTokenForTest(appID,
-         serverSecret,
-         null,
-         userID,
-         userName
-      )
- 
-      useEffect(()=>{
-        if (!TOKEN) return; 
-         const zp = ZegoUIKitPrebuilt.create(TOKEN);
-         zpRef.current = zp
-         zp.addPlugins({ZIM})
-      },[TOKEN])
-       
-      function invite(calltype){
-         if(!receiver) return
-         const targetUser = {
-             userID:receiver._id,
-             userName:receiver.name
-         };
-         zpRef.current.sendCallInvitation({
-             callees:[targetUser],
-             callType:calltype,
-             timeout:60
-         }).then((res)=>{
-             console.warn(res)
-         })
-         .catch((err)=>{
-             console.warn(err);
-         })
-      }
-      
 
 
 
@@ -230,6 +177,56 @@ const typingUserName = storedUser ? JSON.parse(storedUser)?.name || 'guest' : 'g
       // setUsers(data.users)
         setMessage('')
   }
+
+  
+ const zpRef = useRef(null)
+ const storedUser = localStorage.getItem('user');
+const user = storedUser ? JSON.parse(storedUser) : null;
+  const appID = 496043362;
+     let TOKEN = null;
+let userID = null;
+let userName = 'guest';
+
+if (!user?._id) return
+  userID = user._id;
+  userName = user.name || 'guest';
+  // TOKEN = ZegoUIKitPrebuilt.generateKitTokenForTest(appID, serverSecret, null, userID, userName);
+
+       const serverSecret = "5e96d7e03b88a750639930817f46b35e";
+       TOKEN = ZegoUIKitPrebuilt.generateKitTokenForTest(appID,
+         serverSecret,
+         null,
+         userID,
+         userName
+      )
+ 
+      useEffect(()=>{
+        if (!TOKEN) return; 
+         const zp = ZegoUIKitPrebuilt.create(TOKEN);
+         zpRef.current = zp
+         zp.addPlugins({ZIM})
+      },[TOKEN])
+       
+      function invite(calltype){
+         if(!receiver) return
+         const targetUser = {
+             userID:receiver._id,
+             userName:receiver.name
+         };
+         zpRef.current.sendCallInvitation({
+             callees:[targetUser],
+             callType:calltype,
+             timeout:60
+         }).then((res)=>{
+             console.warn(res)
+         })
+         .catch((err)=>{
+             console.warn(err);
+         })
+      }
+      
+
+
 
   return (
     <div className="bg-[#e6e9eb] flex flex-col h-screen">
